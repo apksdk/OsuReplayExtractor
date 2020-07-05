@@ -2,7 +2,7 @@
 Extracts all osu! replays that are saved locally without manually copying and renaming individual replays.
 
 This application is reliant on maps that are stored in `osu!.db`, as replays do not save map information. If your `osu!.db` is missing or does not contain the maps that are used 
-for the replays, you will have to use the osu! API to get map information.
+for the replays, it will have to use the osu! API to get map information.
 
 You can get your API key [here](https://osu.ppy.sh/p/api/).
 
