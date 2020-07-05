@@ -13,6 +13,18 @@ namespace OsuReplayExtractor
     {
         static void Main(string[] args)
         {
+            string replayLocation = AppDomain.CurrentDomain.BaseDirectory + "\\Replays";
+            if (!Directory.Exists(replayLocation))
+            {
+                Directory.CreateDirectory(replayLocation);
+            }
+
+            string apiFileLocation = AppDomain.CurrentDomain.BaseDirectory + "\\apikey.txt";
+            if (!File.Exists(apiFileLocation))
+            {
+                File.WriteAllText(apiFileLocation, "Get your key here: https://osu.ppy.sh/p/api");
+            }
+
             string osuFolderPath;
             if (args.Length == 0)
             {
@@ -28,12 +40,6 @@ namespace OsuReplayExtractor
             List<string> failedSearches = new List<string>();
             List<string> failedMapPaths = new List<string>();
             string apiErrorMsg = "";
-
-            string replayLocation = AppDomain.CurrentDomain.BaseDirectory + "\\Replays";
-            if (!Directory.Exists(replayLocation))
-            {
-                Directory.CreateDirectory(replayLocation);
-            }
 
             // Get all replays' beatmap hash
             Console.WriteLine("Gathering replays...");
