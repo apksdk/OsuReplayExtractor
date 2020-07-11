@@ -12,6 +12,8 @@ for the replays, it will have to use the osu! API to get map information.
 
 You can get your API key [here](https://osu.ppy.sh/p/api/).
 
+**Keep in mind that osu! API should be called ideally no more than 60 times per minute, as mentioned in the [documentation](https://github.com/ppy/osu-api/wiki#terms-of-use). While I have not seen a use case where a search of more than 60+ maps per minute are required, please open an issue this becomes a problem and I'll look into a way for throttling the requests.**
+
 ## Usage
 Can be executed via commandline or shortcuts like so:
 - OsuReplayExtractor.exe C:\osu!
