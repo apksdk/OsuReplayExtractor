@@ -63,11 +63,11 @@
   <ItemGroup>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Replay\Models\Beatmap.cs" />
-    <Compile Include="Replay\DBReader.cs" />
-    <Compile Include="Replay\Models\MapReplay.cs" />
-    <Compile Include="Replay\OsuApi.cs" />
-    <Compile Include="Replay\ReplayReader.cs" />
+    <Compile Include="Models\Beatmap.cs" />
+    <Compile Include="Readers\DBReader.cs" />
+    <Compile Include="Models\MapReplay.cs" />
+    <Compile Include="Api\OsuApi.cs" />
+    <Compile Include="Readers\ReplayReader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

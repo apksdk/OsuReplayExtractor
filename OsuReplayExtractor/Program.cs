@@ -1,10 +1,8 @@
-﻿using Newtonsoft.Json;
-using OsuReplayExtractor.Replay;
+﻿using OsuReplayExtractor.Replay;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 
 namespace OsuReplayExtractor
@@ -22,7 +20,7 @@ namespace OsuReplayExtractor
             string apiFileLocation = AppDomain.CurrentDomain.BaseDirectory + "\\apikey.txt";
             if (!File.Exists(apiFileLocation))
             {
-                File.WriteAllText(apiFileLocation, "Get your key here: https://osu.ppy.sh/p/api");
+                File.Create(apiFileLocation);
             }
 
             string osuFolderPath;
@@ -30,16 +28,33 @@ namespace OsuReplayExtractor
             {
                 Console.WriteLine("Please provide your osu folder path. (e.g. C:\\osu!)");
                 osuFolderPath = Console.ReadLine();
-            } else
+            }
+            else
             {
                 osuFolderPath = args[0];
             }
 
+            ExtractReplays(replayLocation, osuFolderPath);
+
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
+        }
+
+        private static void ExtractReplays(string replayLocation, string osuFolderPath)
+        {
             List<string> replays = Directory.GetFiles(osuFolderPath + "\\Data\\r", "*.osr", SearchOption.AllDirectories).ToList();
             List<MapReplay> replayMapHashes = new List<MapReplay>();
             List<string> failedSearches = new List<string>();
             List<string> failedMapPaths = new List<string>();
             string apiErrorMsg = "";
+            bool skipAPI = false;
+
+            string apiKey = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "\\apikey.txt");
+            if (apiKey.Length == 0)
+            {
+                Console.WriteLine("Missing API key, will not be searching online...");
+                skipAPI = true;
+            }
 
             // Get all replays' beatmap hash
             Console.WriteLine("Gathering replays...");
@@ -59,7 +74,7 @@ namespace OsuReplayExtractor
                 if (success)
                 {
                     // Beatmap has been looked up via API and does not exist
-                    if(beatmap == null)
+                    if (beatmap == null)
                     {
                         failedSearches.Add(replayMapHash.BeatmapHash);
                         failedMapPaths.Add(replays[i]);
@@ -70,41 +85,59 @@ namespace OsuReplayExtractor
                 }
                 else
                 {
-                    // Try getting beatmap via API if not found locally
-                    Console.WriteLine("Attempting to search for beatmap online");
-                    Beatmap retreivedBeatmap = OsuApi.GetMapWithApiAsync(replayMapHash.BeatmapHash, out apiErrorMsg);
-                    if (retreivedBeatmap == null)
+                    if(skipAPI)
                     {
-                        Console.WriteLine("Could not find beatmap online");
                         failedSearches.Add(replayMapHash.BeatmapHash);
                         failedMapPaths.Add(replays[i]);
-                        // Add not found hash to skip duplicate API calls
                         beatmaps.Add(replayMapHash.BeatmapHash, null);
-                    }
-                    else
+                    } else
                     {
-                        CopyAndRenameReplay(replays[i], replayLocation, replayMapHash, retreivedBeatmap);
+                        // Try getting beatmap via API if not found locally
+                        Console.WriteLine("Attempting to search for beatmap online");
+                        Beatmap retreivedBeatmap = OsuApi.GetMapWithApiAsync(replayMapHash.BeatmapHash, out apiErrorMsg);
+                        if (retreivedBeatmap == null)
+                        {
+                            Console.WriteLine("Could not find beatmap online");
+                            failedSearches.Add(replayMapHash.BeatmapHash);
+                            failedMapPaths.Add(replays[i]);
+                            // Add beatmap hash to skip duplicate API calls
+                            beatmaps.Add(replayMapHash.BeatmapHash, null);
+                        }
+                        else
+                        {
+                            CopyAndRenameReplay(replays[i], replayLocation, replayMapHash, retreivedBeatmap);
+                        }
                     }
                 }
             }
 
+            LogFailures(failedSearches, failedMapPaths, apiErrorMsg, skipAPI);
+        }
+
+        private static List<string> LogFailures(List<string> failedSearches, List<string> failedMapPaths, string apiErrorMsg, bool skipAPI)
+        {
             failedSearches = failedSearches.Distinct().ToList();
-            if(failedSearches.Count > 0)
+            if (failedSearches.Count > 0)
             {
                 Console.WriteLine("Failed to find " + failedSearches.Count() + " map hashes");
                 File.WriteAllLines(AppDomain.CurrentDomain.BaseDirectory + "\\FailedMapMatches.txt", failedSearches.ToArray(), Encoding.UTF8);
-                Console.WriteLine("Failed to extract " + failedSearches.Count() + " replays");
+                Console.WriteLine("Failed to extract " + failedMapPaths.Count() + " replays");
                 File.WriteAllLines(AppDomain.CurrentDomain.BaseDirectory + "\\FailedExtractsPath.txt", failedMapPaths.ToArray(), Encoding.UTF8);
                 Console.WriteLine("Failures have been saved into 'FailedMapMatches.txt' or 'FailedExtractsPath.txt'");
             }
 
-            if(apiErrorMsg.Length > 0)
+            if(skipAPI)
             {
-                Console.WriteLine("Online search failed because the server returned: " + apiErrorMsg);
+                Console.WriteLine("Skipped online search. Please add an API key under 'apikey.txt' to enable online searching.");
             }
 
-            Console.WriteLine("Press any key to exit...");
-            Console.ReadKey();
+            if (apiErrorMsg.Length > 0)
+            {
+                Console.WriteLine("Online search failed because the server returned: " + apiErrorMsg);
+                Console.WriteLine("Please ensure your API key is correct and have Internet access before trying again.");
+            }
+
+            return failedSearches;
         }
 
         static void CopyAndRenameReplay(string replayFilePath, string savePath, MapReplay replay, Beatmap beatmap)

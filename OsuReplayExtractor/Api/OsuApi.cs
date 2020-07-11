@@ -13,7 +13,7 @@ namespace OsuReplayExtractor.Replay
             string apiKey = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "\\apikey.txt");
             string getBeatmapApi = $"https://osu.ppy.sh/api/get_beatmaps?k={apiKey}&h={mapHash}";
 
-
+            
             HttpClient client = new HttpClient();
             HttpResponseMessage response = client.GetAsync(getBeatmapApi).Result;
             if (response.IsSuccessStatusCode)
@@ -26,7 +26,7 @@ namespace OsuReplayExtractor.Replay
                         ArtistName = (string)obj[0]["artist"],
                         SongTitle = (string)obj[0]["title"],
                         Difficulty = (string)obj[0]["version"],
-                        GameMode = ((GameMode)Enum.Parse(typeof(GameMode), obj[0]["mode"].ToString()))
+                        GameMode = (GameMode)Enum.Parse(typeof(GameMode), obj[0]["mode"].ToString())
                     };
                     return beatmap;
                 }
@@ -35,7 +35,6 @@ namespace OsuReplayExtractor.Replay
             {
                 apiErrorMsg = response.ReasonPhrase;
             }
-
             return null;
         }
     }
