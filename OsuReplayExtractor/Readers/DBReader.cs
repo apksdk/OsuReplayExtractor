@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace OsuReplayExtractor.Replay
@@ -56,7 +57,7 @@ namespace OsuReplayExtractor.Replay
                 fileReader.ReadBytes(17);
             }
             fileReader.ReadBytes(22);
-            beatmap.GameMode = (GameMode)Enum.Parse(typeof(GameMode), fileReader.ReadByte().ToString());
+            beatmap.GameMode = (GameMode)Enum.Parse(typeof(GameMode), fileReader.ReadByte().ToString(CultureInfo.InvariantCulture));
             fileReader.ReadNullableString();
             fileReader.ReadNullableString();
             fileReader.ReadUInt16();

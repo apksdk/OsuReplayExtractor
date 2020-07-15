@@ -1,6 +1,7 @@
 ﻿using OsuReplayExtractor.Replay;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -20,13 +21,13 @@ namespace OsuReplayExtractor
             string apiFileLocation = AppDomain.CurrentDomain.BaseDirectory + "\\apikey.txt";
             if (!File.Exists(apiFileLocation))
             {
-                File.Create(apiFileLocation);
+                 File.Create(apiFileLocation).Close();
             }
 
             string osuFolderPath;
             if (args.Length == 0)
             {
-                Console.WriteLine("Please provide your osu folder path. (e.g. C:\\osu!)");
+                Console.WriteLine(Properties.Resources.PromptInstallPath);
                 osuFolderPath = Console.ReadLine();
             }
             else
@@ -36,7 +37,7 @@ namespace OsuReplayExtractor
 
             ExtractReplays(replayLocation, osuFolderPath);
 
-            Console.WriteLine("Press any key to exit...");
+            Console.WriteLine(Properties.Resources.PromptExit);
             Console.ReadKey();
         }
 
@@ -52,22 +53,23 @@ namespace OsuReplayExtractor
             string apiKey = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "\\apikey.txt");
             if (apiKey.Length == 0)
             {
-                Console.WriteLine("Missing API key, will not be searching online...");
+                Console.WriteLine(Properties.Resources.InformMissingAPIKey);
                 skipAPI = true;
             }
 
             // Get all replays' beatmap hash
-            Console.WriteLine("Gathering replays...");
+            Console.WriteLine(Properties.Resources.InformReplayGathering);
             foreach (string replayPath in replays)
             {
                 replayMapHashes.Add(ReplayReader.GetReplayInfo(replayPath));
             }
 
-            Console.WriteLine("Gathering existing maps from osu!...");
+            Console.WriteLine(Properties.Resources.InformMapsGathering);
             Dictionary<string, Beatmap> beatmaps = DBReader.ReadDB(osuFolderPath + "\\osu!.db");
             // Match the replay to its' corresponding beatmap
             for (int i = 0; i < replayMapHashes.Count; i++)
             {
+                string totalPercentage = (Convert.ToDouble(i) / (replayMapHashes.Count - 1)).ToString("P", CultureInfo.InvariantCulture);
                 MapReplay replayMapHash = replayMapHashes[i];
                 Beatmap beatmap;
                 bool success = beatmaps.TryGetValue(replayMapHash.BeatmapHash, out beatmap);
@@ -81,7 +83,7 @@ namespace OsuReplayExtractor
                         continue;
                     }
 
-                    CopyAndRenameReplay(replays[i], replayLocation, replayMapHash, beatmap);
+                    CopyAndRenameReplay(replays[i], replayLocation, replayMapHash, beatmap, totalPercentage);
                 }
                 else
                 {
@@ -93,11 +95,11 @@ namespace OsuReplayExtractor
                     } else
                     {
                         // Try getting beatmap via API if not found locally
-                        Console.WriteLine("Attempting to search for beatmap online");
+                        Console.WriteLine(Properties.Resources.InformUsingSearchAPI);
                         Beatmap retreivedBeatmap = OsuApi.GetMapWithApiAsync(replayMapHash.BeatmapHash, out apiErrorMsg);
                         if (retreivedBeatmap == null)
                         {
-                            Console.WriteLine("Could not find beatmap online");
+                            Console.WriteLine(Properties.Resources.InformSearchAPIFailed);
                             failedSearches.Add(replayMapHash.BeatmapHash);
                             failedMapPaths.Add(replays[i]);
                             // Add beatmap hash to skip duplicate API calls
@@ -105,47 +107,45 @@ namespace OsuReplayExtractor
                         }
                         else
                         {
-                            CopyAndRenameReplay(replays[i], replayLocation, replayMapHash, retreivedBeatmap);
+                            CopyAndRenameReplay(replays[i], replayLocation, replayMapHash, retreivedBeatmap, totalPercentage);
                         }
                     }
                 }
             }
 
+            failedSearches = failedSearches.Distinct().ToList();
             LogFailures(failedSearches, failedMapPaths, apiErrorMsg, skipAPI);
         }
 
-        private static List<string> LogFailures(List<string> failedSearches, List<string> failedMapPaths, string apiErrorMsg, bool skipAPI)
+        private static void LogFailures(List<string> failedSearches, List<string> failedMapPaths, string apiErrorMsg, bool skipAPI)
         {
-            failedSearches = failedSearches.Distinct().ToList();
             if (failedSearches.Count > 0)
             {
-                Console.WriteLine("Failed to find " + failedSearches.Count() + " map hashes");
+                Console.WriteLine(Properties.Resources.InformFailedMapHashCount, failedSearches.Count);
                 File.WriteAllLines(AppDomain.CurrentDomain.BaseDirectory + "\\FailedMapMatches.txt", failedSearches.ToArray(), Encoding.UTF8);
-                Console.WriteLine("Failed to extract " + failedMapPaths.Count() + " replays");
+                Console.WriteLine(Properties.Resources.InformFailedReplayCount, failedMapPaths.Count);
                 File.WriteAllLines(AppDomain.CurrentDomain.BaseDirectory + "\\FailedExtractsPath.txt", failedMapPaths.ToArray(), Encoding.UTF8);
-                Console.WriteLine("Failures have been saved into 'FailedMapMatches.txt' or 'FailedExtractsPath.txt'");
+                Console.WriteLine(Properties.Resources.InformFailedResultPaths);
             }
 
             if(skipAPI)
             {
-                Console.WriteLine("Skipped online search. Please add an API key under 'apikey.txt' to enable online searching.");
+                Console.WriteLine(Properties.Resources.InformSearchAPISkip);
             }
 
             if (apiErrorMsg.Length > 0)
             {
-                Console.WriteLine("Online search failed because the server returned: " + apiErrorMsg);
-                Console.WriteLine("Please ensure your API key is correct and have Internet access before trying again.");
+                Console.WriteLine(Properties.Resources.InformSearchAPIFailureReponse, apiErrorMsg);
+                Console.WriteLine(Properties.Resources.InformSearchAPIFailureMessage);
             }
-
-            return failedSearches;
         }
 
-        static void CopyAndRenameReplay(string replayFilePath, string savePath, MapReplay replay, Beatmap beatmap)
+        static void CopyAndRenameReplay(string replayFilePath, string savePath, MapReplay replay, Beatmap beatmap, string totalPercentage)
         {
-            string replayFileName = replay.PlayerName + " - " + beatmap.ArtistName + " - " + beatmap.SongTitle + " [" + beatmap.Difficulty + "] (" + replay.ReplayDate.ToString("dd-MM-yyyy hh-mm-ss tt") + ") " + beatmap.GameMode.ToString();
+            string replayFileName = replay.PlayerName + " - " + beatmap.ArtistName + " - " + beatmap.SongTitle + " [" + beatmap.Difficulty + "] (" + replay.ReplayDate.ToString("dd-MM-yyyy hh-mm-ss tt", new CultureInfo("en-AU")) + ") " + beatmap.GameMode.ToString();
             replayFileName = string.Join("", replayFileName.Split(Path.GetInvalidFileNameChars()));
             File.Copy(replayFilePath, savePath + "\\" + replayFileName + ".osr", true);
-            Console.WriteLine(replayFileName);
+            Console.WriteLine(totalPercentage + "%: " + replayFileName);
         }
     }
 }

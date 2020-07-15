@@ -11,11 +11,12 @@ namespace OsuReplayExtractor.Replay
         {
             apiErrorMsg = "";
             string apiKey = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "\\apikey.txt");
-            string getBeatmapApi = $"https://osu.ppy.sh/api/get_beatmaps?k={apiKey}&h={mapHash}";
+            Uri getBeatmapApi = new Uri($"https://osu.ppy.sh/api/get_beatmaps?k={apiKey}&h={mapHash}");
 
             
             HttpClient client = new HttpClient();
             HttpResponseMessage response = client.GetAsync(getBeatmapApi).Result;
+            client.Dispose();
             if (response.IsSuccessStatusCode)
             {
                 dynamic obj = JsonConvert.DeserializeObject<dynamic>(response.Content.ReadAsStringAsync().Result);

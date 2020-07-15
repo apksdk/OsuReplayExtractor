@@ -27,6 +27,7 @@ namespace OsuReplayExtractor.Replay
             replayReader.ReadBytes(23);
             replayReader.ReadNullableString();
             replay.ReplayDate = new DateTime(BitConverter.ToInt64(replayReader.ReadBytes(8), 0)).ToLocalTime();
+            replayReader.Close();
             return replay;
         }
     }
