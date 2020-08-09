@@ -20,7 +20,8 @@ namespace OsuReplayExtractor.Replay
             BinaryReader replayReader = new BinaryReader(new FileStream(replayFilePath, FileMode.Open, FileAccess.Read, FileShare.Read));
 
             MapReplay replay = new MapReplay();
-            replayReader.ReadBytes(5);
+            replay.ReplayType = (GameMode) replayReader.ReadByte();
+            replayReader.ReadBytes(4);
             replay.BeatmapHash = replayReader.ReadNullableString();
             replay.PlayerName = replayReader.ReadNullableString();
             replayReader.ReadNullableString();

@@ -26,8 +26,32 @@ namespace OsuReplayExtractor.Replay
                 beatmaps.Add(beatmap.Hash, beatmap);
             }
             fileReader.Dispose();
+
+            if(File.Exists(@"mapCache.txt"))
+            {
+                ReadCache(beatmaps);
+            }
             return beatmaps;
         }
+
+        public static Dictionary<string, Beatmap> ReadCache(Dictionary<string, Beatmap> beatmaps)
+        {
+            StreamReader fileReader = new StreamReader(@"mapCache.txt");
+            string line;
+            while((line = fileReader.ReadLine()) != null)
+            {
+                string[] beatmapInfo = line.Split(':');
+                Beatmap beatmap = new Beatmap();
+                beatmap.ArtistName = beatmapInfo[0];
+                beatmap.SongTitle = beatmapInfo[1];
+                beatmap.Difficulty = beatmapInfo[2];
+                beatmap.Hash = beatmapInfo[3];
+                beatmaps.Add(beatmap.Hash, beatmap);
+            }
+            fileReader.Dispose();
+            return beatmaps;
+        }
+
         private static Beatmap readBeatmap(BinaryReader fileReader)
         {
             Beatmap beatmap = new Beatmap();

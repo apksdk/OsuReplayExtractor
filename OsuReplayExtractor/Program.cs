@@ -142,10 +142,10 @@ namespace OsuReplayExtractor
 
         static void CopyAndRenameReplay(string replayFilePath, string savePath, MapReplay replay, Beatmap beatmap, string totalPercentage)
         {
-            string replayFileName = replay.PlayerName + " - " + beatmap.ArtistName + " - " + beatmap.SongTitle + " [" + beatmap.Difficulty + "] (" + replay.ReplayDate.ToString("dd-MM-yyyy hh-mm-ss tt", new CultureInfo("en-AU")) + ") " + beatmap.GameMode.ToString();
+            string replayFileName = replay.PlayerName + " - " + beatmap.ArtistName + " - " + beatmap.SongTitle + " [" + beatmap.Difficulty + "] (" + replay.ReplayDate.ToString("dd-MM-yyyy hh-mm-ss tt", new CultureInfo("en-AU")) + ") " + replay.ReplayType.ToString();
             replayFileName = string.Join("", replayFileName.Split(Path.GetInvalidFileNameChars()));
             File.Copy(replayFilePath, savePath + "\\" + replayFileName + ".osr", true);
-            Console.WriteLine(totalPercentage + "%: " + replayFileName);
+            Console.WriteLine(totalPercentage + ": " + replayFileName);
         }
     }
 }

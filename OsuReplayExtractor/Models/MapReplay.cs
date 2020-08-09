@@ -6,6 +6,11 @@ namespace OsuReplayExtractor.Replay
     {
         public MapReplay() { }
 
+        public GameMode ReplayType
+        {
+            get; set;
+        }
+
         public string BeatmapHash
         {
             get; set;

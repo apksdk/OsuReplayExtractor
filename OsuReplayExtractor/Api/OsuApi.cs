@@ -24,11 +24,16 @@ namespace OsuReplayExtractor.Replay
                 {
                     Beatmap beatmap = new Beatmap
                     {
-                        ArtistName = (string)obj[0]["artist"],
-                        SongTitle = (string)obj[0]["title"],
-                        Difficulty = (string)obj[0]["version"],
-                        GameMode = (GameMode)Enum.Parse(typeof(GameMode), obj[0]["mode"].ToString())
+                        ArtistName = RemoveInvalidFileChars((string)obj[0]["artist"]),
+                        SongTitle = RemoveInvalidFileChars((string)obj[0]["title"]),
+                        Difficulty = RemoveInvalidFileChars((string)obj[0]["version"]),
+                        GameMode = (GameMode)Enum.Parse(typeof(GameMode), obj[0]["mode"].ToString()),
+                        Hash = (string)obj[0]["file_md5"]
                     };
+                    using (StreamWriter cacheWriter = File.AppendText("mapCache.txt"))
+                    {
+                        cacheWriter.WriteLine(beatmap.ToString());
+                    }
                     return beatmap;
                 }
             }
@@ -37,6 +42,11 @@ namespace OsuReplayExtractor.Replay
                 apiErrorMsg = response.ReasonPhrase;
             }
             return null;
+        }
+
+        private static string RemoveInvalidFileChars(string text)
+        {
+            return string.Join("", text.Split(Path.GetInvalidFileNameChars()));
         }
     }
 }

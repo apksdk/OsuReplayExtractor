@@ -26,6 +26,11 @@ namespace OsuReplayExtractor.Replay
         {
             get; set;
         }
+
+        public override string ToString()
+        {
+            return ArtistName + ":" + SongTitle + ":" + Difficulty + ":" + Hash;
+        }
     }
 
     public enum GameMode
