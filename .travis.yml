@@ -1,0 +1,20 @@
+language: csharp
+solution: OsuReplayExtractor.sln
+after_success:
+  - git config --global user.email "builds@travis-ci.com"
+  - git config --global user.name "Travis CI"
+  - export GIT_TAG=$(cat version)
+  - git tag $GIT_TAG -a -m "Generated tag from TravisCI build $TRAVIS_BUILD_NUMBER"
+  - git push https://${GH_TOKEN}@github.com/apksdk/OsuReplayExtractor.git $GIT_TAG
+before_deploy:
+  - cd OsuReplayExtractor/bin/Release
+  - zip -r OsuReplayExtractor.zip OsuReplayExtractor.exe Newtonsoft.Json.dll
+deploy:
+  provider: releases
+  api_key:
+    secure: qo9bhI7KsvUclR0i845YUfDI3vmQG0cAmr4S16+nCKCl+cyyNAdBlCnScMOODTsilZ6US7PDGR1OVQMpBr5O+MFq6Tynz/S5ApYQS2LOI6S9ejpgYKdtu8B7nx11UbxV3mFzPMJ4TzsMH3wOBIZMt3/oLX1cDw9TkD1YD/xlaEeMqH5xl24B1OK6iAx4PJvlZwZcDJOmMFItP4CsQwog3oXehyUSDCDhgTnq+5oAptAfTjbTBnaJYBcPt3He6/Ppy5PF6XW32/H9dn6MPEzwkWmLpuoypCc7+DLo9qVMxD8asv6j4kDOzb6wWBwxkHmEllAvVyseIYK0PQ3BVqONIfMriU4Th8i56UijhUDcpPICVZJ+0MDfwzeGaqKlMKKXdmIIEvDA3EaRODw8Ir4/4KWVTZ+zaDPAmbswIb1e/Pq7yY35YzUISw8Hub1cRmuVjcd94qDTY/184TS0eMb2bQHgEwnIlamPeoOwt0mh0UroAuC/H/DydF4PuWrYZ4lTA1aPwj+sJTJs0OlpGgpNl5AgwNC2EdZLeTFVnMnpbI0ZA97BRqOk4q+metRwNgw3W7+B5uryny45+A02BswONUnnGngyOhzqmuOQVZw6reTSQLOUrsuuE7pc2HZmv67MmZnyOFzFZH2jqnvBMOzqeXuelJjzGfdccNt9EwgcSbI=
+  file: OsuReplayExtractor.zip
+  on:
+    repo: apksdk/OsuReplayExtractor
+  skip_cleanup: 'true'
+  draft: true
