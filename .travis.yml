@@ -16,5 +16,6 @@ deploy:
   file: OsuReplayExtractor.zip
   on:
     repo: apksdk/OsuReplayExtractor
+    tags: true
   skip_cleanup: 'true'
   draft: true
