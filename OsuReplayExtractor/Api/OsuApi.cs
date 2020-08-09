@@ -13,10 +13,10 @@ namespace OsuReplayExtractor.Replay
             string apiKey = File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "\\apikey.txt");
             Uri getBeatmapApi = new Uri($"https://osu.ppy.sh/api/get_beatmaps?k={apiKey}&h={mapHash}");
 
-            
             HttpClient client = new HttpClient();
             HttpResponseMessage response = client.GetAsync(getBeatmapApi).Result;
             client.Dispose();
+
             if (response.IsSuccessStatusCode)
             {
                 dynamic obj = JsonConvert.DeserializeObject<dynamic>(response.Content.ReadAsStringAsync().Result);
@@ -30,10 +30,6 @@ namespace OsuReplayExtractor.Replay
                         GameMode = (GameMode)Enum.Parse(typeof(GameMode), obj[0]["mode"].ToString()),
                         Hash = (string)obj[0]["file_md5"]
                     };
-                    using (StreamWriter cacheWriter = File.AppendText("mapCache.txt"))
-                    {
-                        cacheWriter.WriteLine(beatmap.ToString());
-                    }
                     return beatmap;
                 }
             }

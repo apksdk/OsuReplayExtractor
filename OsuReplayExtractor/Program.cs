@@ -66,6 +66,7 @@ namespace OsuReplayExtractor
 
             Console.WriteLine(Properties.Resources.InformMapsGathering);
             Dictionary<string, Beatmap> beatmaps = DBReader.ReadDB(osuFolderPath + "\\osu!.db");
+            List<Beatmap> lookedUpMaps = new List<Beatmap>();
             // Match the replay to its' corresponding beatmap
             for (int i = 0; i < replayMapHashes.Count; i++)
             {
@@ -108,11 +109,12 @@ namespace OsuReplayExtractor
                         else
                         {
                             CopyAndRenameReplay(replays[i], replayLocation, replayMapHash, retreivedBeatmap, totalPercentage);
+                            lookedUpMaps.Add(retreivedBeatmap);
                         }
                     }
                 }
             }
-
+            File.AppendAllLines(AppDomain.CurrentDomain.BaseDirectory + "\\mapCache.txt", lookedUpMaps.ConvertAll(obj => obj.ToString()).Distinct(), Encoding.UTF8);
             failedSearches = failedSearches.Distinct().ToList();
             LogFailures(failedSearches, failedMapPaths, apiErrorMsg, skipAPI);
         }
