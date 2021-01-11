@@ -1,37 +1,23 @@
-## Welcome to GitHub Pages
+# OsuReplayExtractor
+Extracts all osu! replays that are saved locally without manually copying and renaming individual replays. Replays are named as followed:
 
-You can use the [editor on GitHub](https://github.com/apksdk/OsuReplayExtractor/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+`Player Name - Artist Name - Song Title [Diff Name] (Replay Date) Game Mode`
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+e.g.
 
-### Markdown
+`jw9478 - Eve - GekkaMidare Botan [Nameless Stage] (03-06-2020 12-22-25 PM) Osu`
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+This application is reliant on maps that are stored in `osu!.db`, as replays do not save map information. If your `osu!.db` is missing or does not contain the maps that are used 
+for the replays, it will have to use the osu! API to get map information.
 
-```markdown
-Syntax highlighted code block
+You can get your API key [here](https://osu.ppy.sh/p/api/).
 
-# Header 1
-## Header 2
-### Header 3
+**Keep in mind that osu! API should be called ideally no more than 60 times per minute, as mentioned in the [documentation](https://github.com/ppy/osu-api/wiki#terms-of-use). While I have not seen a use case where a search of more than 60+ maps per minute are required, please open an issue this becomes a problem and I'll look into a way for throttling the requests.**
 
-- Bulleted
-- List
+## Usage
+Can be executed via commandline or shortcuts like so:
+- OsuReplayExtractor.exe C:\osu!
 
-1. Numbered
-2. List
+Alternatively, you can manually input your osu! folder after opening the application without any arguments.
 
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/apksdk/OsuReplayExtractor/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+OsuReplayExtractor supports beatmap lookup using osu!'s API. Edit the `apikey.txt` and put your API key if you wish to do so.
