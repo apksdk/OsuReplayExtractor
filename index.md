@@ -1,5 +1,3 @@
-<meta name="google-site-verification" content="ydk3NbOgWqjR-UswmFVZyJOILAHRrm1BoiZdz17wow8" />
-
 # OsuReplayExtractor
 Extracts all osu! replays that are saved locally without manually copying and renaming individual replays. Replays are named as followed:
 
