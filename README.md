@@ -1,4 +1,4 @@
-# OsuReplayExtractor
+# Osu Replay Extractor
 Extracts all osu! replays that are saved locally without manually copying and renaming individual replays. Replays are named as followed:
 
 `Player Name - Artist Name - Song Title [Diff Name] (Replay Date) Game Mode`
